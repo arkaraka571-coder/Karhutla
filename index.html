@@ -8,28 +8,34 @@
 <style>
 :root { --bg: #050507; --panel: #0a0a0f; --border: #1a1a24; --accent: #ff2d00; --accent-glow: rgba(255, 45, 0, 0.6); --warning: #ffab00; --text: #ffffff; --text-dim: #a0a0b0; --tn: #ff0000; --tahura: #00f0ff; --perhutani: #ffab00; --warga: #aaff00; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; width: 100%; max-width: 100vw; height: 100vh; }
+html, body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; width: 100%; height: 100%; }
 body { padding: 0; background-image: linear-gradient(rgba(255, 45, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 45, 0, 0.03) 1px, transparent 1px); background-size: 40px 40px; }
-.container { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; }
+.container { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 15px; }
 
-.panel { background: var(--panel); border: 1px solid var(--border); position: relative; overflow: hidden; flex-grow: 1; display: flex; flex-direction: column; }
+.panel { background: var(--panel); border: 1px solid var(--border); position: relative; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
 .panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
-.panel-header { padding: 8px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 45, 0, 0.05); flex-wrap: wrap; gap: 10px; flex-shrink: 0; }
+
+.panel-header { padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 45, 0, 0.05); flex-shrink: 0; }
 .panel-header h1 { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
 .panel-header .status-live { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
 .live-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: blink 1.5s infinite; }
 @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-.content-grid { display: grid; grid-template-columns: 300px 1fr; gap: 0; flex-grow: 1; min-height: 0; }
-.left-col { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow-y: auto; }
+/* LAYOUT 2 KOLOM */
+.content-grid { display: grid; grid-template-columns: 250px 1fr; gap: 0; flex-grow: 1; min-height: 0; }
+@media (max-width: 768px) { 
+    .content-grid { grid-template-columns: 1fr; }
+    .left-col { border-right: none !important; border-bottom: 1px solid var(--border); max-height: 40%; }
+}
 
-.summary-box { padding: 15px; text-align: center; border-bottom: 1px solid var(--border); background: radial-gradient(circle at center, rgba(255, 45, 0, 0.1), transparent 70%); }
+.left-col { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; }
+.summary-box { padding: 15px; text-align: center; border-bottom: 1px solid var(--border); background: radial-gradient(circle at center, rgba(255, 45, 0, 0.1), transparent 70%); flex-shrink: 0; }
 .summary-box h3 { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-.summary-box .total-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 800; color: #fff; text-shadow: 0 0 15px var(--accent-glow); }
+.summary-box .total-value { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 800; color: #fff; text-shadow: 0 0 15px var(--accent-glow); }
 .summary-box .total-value span { font-size: 14px; color: var(--accent); }
 .summary-box p { font-size: 9px; color: var(--text-dim); margin-top: 5px; font-family: 'JetBrains Mono', monospace; }
 
-.sub-panel { padding: 15px; border-bottom: 1px solid var(--border); }
+.sub-panel { padding: 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .sub-panel:last-child { border-bottom: none; }
 .sub-panel h2 { font-family: 'JetBrains Mono', monospace; font-size: 11px; margin: 0 0 10px 0; text-transform: uppercase; color: var(--text); letter-spacing: 1px; border-left: 3px solid var(--accent); padding-left: 8px; }
 
@@ -47,12 +53,17 @@ body { padding: 0; background-image: linear-gradient(rgba(255, 45, 0, 0.03) 1px,
 .hotspot-count { color: var(--accent); font-weight: bold; }
 
 .right-col { display: flex; flex-direction: column; overflow: hidden; }
-.table-header-panel { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.table-header-panel { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .table-header-panel h2 { font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; color: var(--text); letter-spacing: 1px; border-left: 3px solid var(--accent); padding-left: 8px; }
-.search-input { padding: 6px 8px; background: #0a0a0f; border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; border-radius: 0; width: 200px; max-width: 100%; }
+.search-input { padding: 6px 8px; background: #0a0a0f; border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; border-radius: 0; width: 150px; max-width: 100%; }
 .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px rgba(255, 45, 0, 0.2); }
 
-.table-container { flex-grow: 1; overflow: auto; }
+.table-container { flex-grow: 1; overflow-y: auto; overflow-x: hidden; }
+.table-container::-webkit-scrollbar { width: 6px; }
+.table-container::-webkit-scrollbar-track { background: #050507; }
+.table-container::-webkit-scrollbar-thumb { background: var(--border); }
+.table-container::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
 table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
 th { background: #0a0a0f; color: var(--text-dim); font-size: 9px; text-transform: uppercase; padding: 10px; text-align: left; border-bottom: 1px solid var(--border); letter-spacing: 1px; position: sticky; top: 0; z-index: 1; }
 td { padding: 10px; border-bottom: 1px solid #111; color: var(--text); vertical-align: top; }
@@ -69,7 +80,7 @@ td strong { color: #fff; font-weight: 700; }
 <div class="panel">
     <div class="panel-header">
         <h1>// Analisis & Database Insiden</h1>
-        <div class="status-live"><span class="live-dot"></span> LIVE FEED: 17_AGS_2026</div>
+        <div class="status-live"><span class="live-dot"></span> DATA PER 17 AGS 2026</div>
     </div>
     <div class="content-grid">
         <div class="left-col">
@@ -90,7 +101,7 @@ td strong { color: #fff; font-weight: 700; }
         <div class="right-col">
             <div class="table-header-panel">
                 <h2>Database Lengkap</h2>
-                <input type="text" id="table-search" class="search-input" placeholder="🔍 Cari data..." oninput="renderTable()">
+                <input type="text" id="table-search" class="search-input" placeholder="🔍 Cari..." oninput="renderTable()">
             </div>
             <div class="table-container">
                 <table>
@@ -100,7 +111,7 @@ td strong { color: #fff; font-weight: 700; }
             </div>
         </div>
     </div>
-    <div class="footer-src">// SUMBER: SIPONGI KLHK, BMKG, BNPB, MEDIA | DISCLAIMER: Data per 17 Agustus 2026, mungkin ada yang tidak tercatat.</div>
+    <div class="footer-src">// SUMBER: SIPONGI KLHK, BMKG, BNPB, MEDIA | DATA PER 17 AGUSTUS 2026</div>
 </div>
 </div>
 
