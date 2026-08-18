@@ -3,146 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Operation Fire Watch - Database</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<title>Dashboard Karhutla Jatim - Database</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root { --bg: #050507; --panel: #0a0a0f; --border: #1a1a24; --accent: #ff2d00; --accent-glow: rgba(255, 45, 0, 0.6); --warning: #ffab00; --text: #ffffff; --text-dim: #a0a0b0; --tn: #ff0000; --tahura: #00f0ff; --perhutani: #ffab00; --warga: #aaff00; }
+:root { --primary:#b71c1c; --secondary:#ff9800; --bg:#f8f9fa; --c-tn:#d32f2f; --c-tahura:#1976d2; --c-perhutani:#f57c00; --c-warga:#607d8b; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; width: 100%; height: 100%; }
-body { padding: 0; background-image: linear-gradient(rgba(255, 45, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 45, 0, 0.03) 1px, transparent 1px); background-size: 40px 40px; }
-.container { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 15px; }
+html, body { font-family:'Inter',sans-serif; background:var(--bg); color:#2c3e50; overflow-x: hidden; width: 100%; max-width: 100vw; }
+body { padding: 15px; }
+.container { width: 100%; max-width: 800px; margin: 0 auto; }
 
-.panel { background: var(--panel); border: 1px solid var(--border); position: relative; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-.panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+.panel { background:rgba(255,255,255,0.95); border-radius:12px; padding:15px; box-shadow:0 4px 20px rgba(0,0,0,0.08); border:1px solid #eee; }
+.panel-header { background:linear-gradient(135deg,#2c3e50 0%,#3b4d5f 100%); color:#fff; padding:20px; margin:-15px -15px 15px -15px; border-radius:12px 12px 0 0; border-bottom:4px solid var(--secondary); text-align:center; }
+.panel-header h1 { font-size:20px; font-weight:800; text-transform:uppercase; }
+.panel-header p { font-size:12px; opacity:0.85; margin-top:5px; }
 
-.panel-header { padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 45, 0, 0.05); flex-shrink: 0; }
-.panel-header h1 { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
-.panel-header .status-live { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
-.live-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: blink 1.5s infinite; }
-@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+/* Kotak Total Luas */
+.summary-box { padding: 20px; text-align: center; border: 1px solid #ffe082; border-radius: 12px; margin-bottom: 15px; background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); }
+.summary-box h3 { font-size: 12px; color: #7f8c8d; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+.summary-box .total-value { font-size: 36px; font-weight: 800; color: var(--primary); line-height: 1.2; }
+.summary-box .total-value span { font-size: 16px; color: var(--secondary); }
+.summary-box p { font-size: 11px; color: #856404; margin-top: 5px; font-weight: 600; }
 
-/* LAYOUT 2 KOLOM */
-.content-grid { display: grid; grid-template-columns: 250px 1fr; gap: 0; flex-grow: 1; min-height: 0; }
-@media (max-width: 768px) { 
-    .content-grid { grid-template-columns: 1fr; }
-    .left-col { border-right: none !important; border-bottom: 1px solid var(--border); max-height: 40%; }
-}
+/* LAYOUT 2 KOLOM UNTUK TOP 5 & PROPORSI */
+.analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+@media (max-width: 600px) { .analysis-grid { grid-template-columns: 1fr; } }
 
-.left-col { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; }
-.summary-box { padding: 15px; text-align: center; border-bottom: 1px solid var(--border); background: radial-gradient(circle at center, rgba(255, 45, 0, 0.1), transparent 70%); flex-shrink: 0; }
-.summary-box h3 { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-.summary-box .total-value { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 800; color: #fff; text-shadow: 0 0 15px var(--accent-glow); }
-.summary-box .total-value span { font-size: 14px; color: var(--accent); }
-.summary-box p { font-size: 9px; color: var(--text-dim); margin-top: 5px; font-family: 'JetBrains Mono', monospace; }
+.sub-panel { background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #f0f0f0; }
+.sub-panel h2 { font-size: 13px; margin: 0 0 15px 0; text-transform: uppercase; font-weight: 800; text-align: center; letter-spacing: 0.5px; color: var(--dark); }
 
-.sub-panel { padding: 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.sub-panel:last-child { border-bottom: none; }
-.sub-panel h2 { font-family: 'JetBrains Mono', monospace; font-size: 11px; margin: 0 0 10px 0; text-transform: uppercase; color: var(--text); letter-spacing: 1px; border-left: 3px solid var(--accent); padding-left: 8px; }
+/* Top 5 Picto */
+.picto-container { display:flex; flex-direction:column; gap:10px; align-items:center; padding-top: 5px; }
+.picto-row { display:flex; align-items:center; gap:8px; width:100%; justify-content:flex-start; font-size: 11px; }
+.picto-label { font-weight:600; color:#444; width:70px; text-align:right; flex-shrink: 0; }
+.picto-icons { font-size:14px; letter-spacing:2px; flex:1; text-align:left; }
+.picto-count { color: var(--primary); font-weight: 800; }
 
-.bar-chart { display: flex; flex-direction: column; gap: 8px; }
-.bar-row { display: flex; flex-direction: column; gap: 3px; }
-.bar-info { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text); text-transform: uppercase; }
-.bar-track { width: 100%; height: 6px; background: #000; border: 1px solid var(--border); overflow: hidden; position: relative; }
-.bar-fill { height: 100%; width: 0; transition: width 1.5s ease-out; box-shadow: 0 0 10px currentColor; }
+/* Pie Chart */
+.chart-box { width:100%; height: 220px; }
 
-.hotspot-list { display: flex; flex-direction: column; gap: 6px; }
-.hotspot-row { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
-.hotspot-rank { color: var(--text-dim); width: 15px; }
-.hotspot-name { color: var(--text); flex: 1; text-transform: uppercase; }
-.hotspot-bar { height: 3px; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-.hotspot-count { color: var(--accent); font-weight: bold; }
+/* Tombol Accordion */
+.accordion-btn { background: #2c3e50; color: white; cursor: pointer; padding: 15px 20px; width: 100%; text-align: center; border: none; outline: none; font-size: 15px; font-weight: 700; border-radius: 8px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; margin-bottom: 0; }
+.accordion-btn:hover { background: #1a252f; }
+.accordion-icon { font-size: 18px; transition: transform 0.3s; }
+.accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #fff; border-left: 1px solid #eee; border-right: 1px solid #eee; }
+.accordion-content.show { max-height: 2000px; border-bottom: 1px solid #eee; }
 
-.right-col { display: flex; flex-direction: column; overflow: hidden; }
-.table-header-panel { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.table-header-panel h2 { font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; color: var(--text); letter-spacing: 1px; border-left: 3px solid var(--accent); padding-left: 8px; }
-.search-input { padding: 6px 8px; background: #0a0a0f; border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; border-radius: 0; width: 150px; max-width: 100%; }
-.search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px rgba(255, 45, 0, 0.2); }
+/* Tabel */
+.table-header { display:flex; justify-content:center; align-items:center; margin:15px 0; flex-wrap:wrap; gap:10px; }
+.search-input { padding:8px 12px; border:1px solid #ddd; border-radius:20px; font-size:12px; width:250px; max-width:100%; text-align: center; }
+.table-container { max-width: 100%; overflow:auto; border:1px solid #eee; border-radius:8px; margin-top: 10px; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { background:#f9f9f9; color:#444; font-size:11px; text-transform:uppercase; padding:12px; text-align:left; position:sticky; top:0; z-index:1; }
+td { padding:12px; border-bottom:1px solid #eee; vertical-align:top; }
+.tag { padding:4px 8px; border-radius:12px; font-size:10px; font-weight:bold; color:#fff; white-space:nowrap; display:inline-block; }
+.tag-tn { background:var(--c-tn); } .tag-tahura { background:var(--c-tahura); } .tag-perhutani { background:var(--c-perhutani); } .tag-warga { background:var(--c-warga); }
 
-.table-container { flex-grow: 1; overflow-y: auto; overflow-x: hidden; }
-.table-container::-webkit-scrollbar { width: 6px; }
-.table-container::-webkit-scrollbar-track { background: #050507; }
-.table-container::-webkit-scrollbar-thumb { background: var(--border); }
-.table-container::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
-th { background: #0a0a0f; color: var(--text-dim); font-size: 9px; text-transform: uppercase; padding: 10px; text-align: left; border-bottom: 1px solid var(--border); letter-spacing: 1px; position: sticky; top: 0; z-index: 1; }
-td { padding: 10px; border-bottom: 1px solid #111; color: var(--text); vertical-align: top; }
-tr:hover { background: rgba(255, 45, 0, 0.05); }
-td strong { color: #fff; font-weight: 700; }
-.tag { padding: 3px 6px; font-size: 8px; font-weight: bold; color: #000; text-transform: uppercase; display: inline-block; }
-.tag-tn { background: var(--tn); } .tag-tahura { background: var(--tahura); } .tag-perhutani { background: var(--perhutani); } .tag-warga { background: var(--warga); }
-
-.footer-src { text-align: center; padding: 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.footer-src { text-align:center; margin-top:20px; font-size:11px; color:#999; }
+.disclaimer-box { text-align:center; margin-top:10px; padding:12px; background:#fff3cd; border:1px solid #ffeeba; border-radius:8px; font-size:11px; color:#856404; line-height:1.5; }
 </style>
 </head>
 <body>
 <div class="container">
 <div class="panel">
-    <div class="panel-header">
-        <h1>// Analisis & Database Insiden</h1>
-        <div class="status-live"><span class="live-dot"></span> DATA PER 17 AGS 2026</div>
-    </div>
-    <div class="content-grid">
-        <div class="left-col">
-            <div class="summary-box">
-                <h3>Total Luas (Media)</h3>
-                <div class="total-value">2246.40 <span>Ha</span></div>
-                <p>// 25 Insiden Terverifikasi</p>
-            </div>
-            <div class="sub-panel">
-                <h2>Proporsi Luas</h2>
-                <div id="bar-chart" class="bar-chart"></div>
-            </div>
-            <div class="sub-panel">
-                <h2>Top 5 Hotspot</h2>
-                <div id="hotspot-list" class="hotspot-list"></div>
-            </div>
-        </div>
-        <div class="right-col">
-            <div class="table-header-panel">
-                <h2>Database Lengkap</h2>
-                <input type="text" id="table-search" class="search-input" placeholder="🔍 Cari..." oninput="renderTable()">
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>ID</th><th>Lokasi</th><th>Pengelola</th><th>Luas (Ha)</th><th>Sumber</th></tr></thead>
-                    <tbody id="table-body"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div class="footer-src">// SUMBER: SIPONGI KLHK, BMKG, BNPB, MEDIA | DATA PER 17 AGUSTUS 2026</div>
+<div class="panel-header"><h1>Analisis & Database Insiden</h1><p>Periode Per 17 Agustus 2026</p></div>
+
+<div class="summary-box">
+    <h3>Total Luas Terbakar (Akumulasi Media)</h3>
+    <div class="total-value">2.246,40 <span>Ha</span></div>
+    <p>Tersebar di 25 titik insiden verifikatif</p>
 </div>
+
+<div class="analysis-grid">
+    <div class="sub-panel">
+        <h2>🔥 Top 5 Hotspot</h2>
+        <div id="picto" class="picto-container"></div>
+    </div>
+    <div class="sub-panel">
+        <h2>📊 Proporsi Luas</h2>
+        <div id="chart-pie" class="chart-box"></div>
+    </div>
+</div>
+
+<button class="accordion-btn" id="accordion-btn">
+    <span>Klik Data Lengkap</span>
+    <span class="accordion-icon">▼</span>
+</button>
+
+<div class="accordion-content" id="accordion-content">
+    <div class="table-header">
+        <input type="text" id="table-search" class="search-input" placeholder="🔍 Cari lokasi/kabupaten..." oninput="renderTable()">
+    </div>
+    <div class="table-container">
+        <table>
+            <thead><tr><th>ID</th><th>Lokasi</th><th>Pengelola</th><th>Luas (Ha)</th><th>Sumber</th></tr></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+<div class="footer-src">Sumber: Sipongi KLHK, BMKG, BNPB, dan beberapa media.</div>
+<div class="disclaimer-box"><strong>Disclaimer:</strong> Data diperbarui per 17 Agustus 2026. Mungkin terdapat kejadian karhutla yang tidak tercatat dalam sistem.</div>
 </div>
 
 <script>
 window.onload = function() {
+if (typeof Plotly === 'undefined') return;
+
 const dataMedia = [
-    {no:"001", kab:"Situbondo", lokasi:"TN Baluran", tgl:"Mei-Ags 2026", kawasan:"Taman Nasional", luas:920.06, sumber:"Mongabay", cat:"Taman Nasional", color:"#ff0000"},
-    {no:"002", kab:"Probolinggo", lokasi:"Gunung Ringgit", tgl:"25 Jul 2026", kawasan:"Perhutani", luas:6.00, sumber:"Radar Bromo", cat:"Perhutani", color:"#ffab00"},
-    {no:"003", kab:"Probolinggo", lokasi:"Gunung Bentar", tgl:"24 Jul 2026", kawasan:"Perhutani", luas:2.50, sumber:"Radar Bromo", cat:"Perhutani", color:"#ffab00"},
-    {no:"004", kab:"Probolinggo", lokasi:"Gunung Geni", tgl:"24 Jul 2026", kawasan:"Perhutani", luas:2.00, sumber:"Radar Bromo", cat:"Perhutani", color:"#ffab00"},
-    {no:"005", kab:"Situbondo", lokasi:"Gunung Malang", tgl:"2 Ags 2026", kawasan:"Perhutani", luas:4.00, sumber:"Kompas", cat:"Perhutani", color:"#ffab00"},
-    {no:"006", kab:"Situbondo", lokasi:"Desa Balung", tgl:"24 Jul 2026", kawasan:"Perhutani", luas:2.00, sumber:"Antara", cat:"Perhutani", color:"#ffab00"},
-    {no:"007", kab:"Trenggalek", lokasi:"Desa Gayam", tgl:"13 Jul 2026", kawasan:"Lahan Warga", luas:3.50, sumber:"Detik", cat:"Lahan", color:"#aaff00"},
-    {no:"008", kab:"Mojokerto", lokasi:"Gunung Biru", tgl:"15 Jul 2026", kawasan:"Tahura R Soerjo", luas:99.50, sumber:"Suryamalang", cat:"Tahura", color:"#00f0ff"},
-    {no:"009", kab:"Trenggalek", lokasi:"Gunung Sawe", tgl:"5 Ags 2026", kawasan:"Perhutani", luas:1.50, sumber:"Kompasiana", cat:"Perhutani", color:"#ffab00"},
-    {no:"010", kab:"Trenggalek", lokasi:"Gunung Semo", tgl:"31 Jul 2026", kawasan:"Perhutani", luas:3.00, sumber:"BPBD", cat:"Perhutani", color:"#ffab00"},
-    {no:"011", kab:"Blitar", lokasi:"Desa Ngembul", tgl:"24 Jul 2026", kawasan:"Lahan Warga", luas:5.00, sumber:"Inews", cat:"Lahan", color:"#aaff00"},
-    {no:"012", kab:"Ponorogo", lokasi:"Gunung Gombak", tgl:"13-14 Jul 2026", kawasan:"Perhutani", luas:15.00, sumber:"CNN", cat:"Perhutani", color:"#ffab00"},
-    {no:"013", kab:"Ponorogo", lokasi:"Petak 62", tgl:"22 Jul 2026", kawasan:"Perhutani", luas:2.30, sumber:"Radar Madiun", cat:"Perhutani", color:"#ffab00"},
-    {no:"014", kab:"Malang", lokasi:"TNBTS", tgl:"17 Ags 2026", kawasan:"Taman Nasional", luas:1121.66, sumber:"CNN", cat:"Taman Nasional", color:"#ff0000"},
-    {no:"015", kab:"Pacitan", lokasi:"Desa Sambong", tgl:"7 Jul 2026", kawasan:"Lahan Warga", luas:15.00, sumber:"JTV", cat:"Lahan", color:"#aaff00"},
-    {no:"016", kab:"Pacitan", lokasi:"Dsn Tenggaran", tgl:"22 Jul 2026", kawasan:"Lahan Warga", luas:1.00, sumber:"Radar Madiun", cat:"Lahan", color:"#aaff00"},
-    {no:"017", kab:"Lumajang", lokasi:"G Pucangrangga", tgl:"10 Jul 2026", kawasan:"Perhutani", luas:9.48, sumber:"BPBD", cat:"Perhutani", color:"#ffab00"},
-    {no:"018", kab:"Madiun", lokasi:"RPH Dawuhan", tgl:"9 Jul 2026", kawasan:"Perhutani", luas:0.30, sumber:"BPBD", cat:"Perhutani", color:"#ffab00"},
-    {no:"019", kab:"Jember", lokasi:"Gunung Watangan", tgl:"9 Ags 2026", kawasan:"Perhutani", luas:6.50, sumber:"Kompas", cat:"Perhutani", color:"#ffab00"},
-    {no:"020", kab:"Malang", lokasi:"Gunung Geger", tgl:"14 Ags 2026", kawasan:"Perhutani", luas:12.00, sumber:"Antara", cat:"Perhutani", color:"#ffab00"},
-    {no:"021", kab:"Bondowoso", lokasi:"Arak-Arak", tgl:"13 Ags 2026", kawasan:"Perhutani", luas:6.00, sumber:"Kompas", cat:"Perhutani", color:"#ffab00"},
-    {no:"022", kab:"Blitar", lokasi:"Gunung Kuncen", tgl:"10 Ags 2026", kawasan:"Lahan Warga", luas:0.05, sumber:"Kompas", cat:"Lahan", color:"#aaff00"},
-    {no:"023", kab:"Blitar", lokasi:"Gunung Pegat", tgl:"8 Ags 2026", kawasan:"Lahan Warga", luas:0.05, sumber:"Kompas", cat:"Lahan", color:"#aaff00"},
-    {no:"024", kab:"Magetan", lokasi:"Desa Mategal", tgl:"17 Ags 2026", kawasan:"Lahan Warga", luas:3.00, sumber:"Beritajatim", cat:"Lahan", color:"#aaff00"},
-    {no:"025", kab:"Magetan", lokasi:"Gunung Bungkuk", tgl:"9 Ags 2026", kawasan:"Lahan Warga", luas:5.00, sumber:"RRI", cat:"Lahan", color:"#aaff00"}
+    {no:"001", kab:"Situbondo", lokasi:"TN Baluran", tgl:"Mei-Ags 2026", kawasan:"Taman Nasional", luas:920.06, sumber:"Mongabay", cat:"Taman Nasional", color:"#d32f2f"},
+    {no:"002", kab:"Probolinggo", lokasi:"Gunung Ringgit", tgl:"25 Jul 2026", kawasan:"Perhutani", luas:6.00, sumber:"Radar Bromo", cat:"Perhutani", color:"#f57c00"},
+    {no:"003", kab:"Probolinggo", lokasi:"Gunung Bentar", tgl:"24 Jul 2026", kawasan:"Perhutani", luas:2.50, sumber:"Radar Bromo", cat:"Perhutani", color:"#f57c00"},
+    {no:"004", kab:"Probolinggo", lokasi:"Gunung Geni", tgl:"24 Jul 2026", kawasan:"Perhutani", luas:2.00, sumber:"Radar Bromo", cat:"Perhutani", color:"#f57c00"},
+    {no:"005", kab:"Situbondo", lokasi:"Gunung Malang", tgl:"2 Ags 2026", kawasan:"Perhutani", luas:4.00, sumber:"Kompas", cat:"Perhutani", color:"#f57c00"},
+    {no:"006", kab:"Situbondo", lokasi:"Desa Balung", tgl:"24 Jul 2026", kawasan:"Perhutani", luas:2.00, sumber:"Antara", cat:"Perhutani", color:"#f57c00"},
+    {no:"007", kab:"Trenggalek", lokasi:"Desa Gayam", tgl:"13 Jul 2026", kawasan:"Lahan Warga", luas:3.50, sumber:"Detik", cat:"Lahan", color:"#607d8b"},
+    {no:"008", kab:"Mojokerto", lokasi:"Gunung Biru", tgl:"15 Jul 2026", kawasan:"Tahura R Soerjo", luas:99.50, sumber:"Suryamalang", cat:"Tahura", color:"#1976d2"},
+    {no:"009", kab:"Trenggalek", lokasi:"Gunung Sawe", tgl:"5 Ags 2026", kawasan:"Perhutani", luas:1.50, sumber:"Kompasiana", cat:"Perhutani", color:"#f57c00"},
+    {no:"010", kab:"Trenggalek", lokasi:"Gunung Semo", tgl:"31 Jul 2026", kawasan:"Perhutani", luas:3.00, sumber:"BPBD", cat:"Perhutani", color:"#f57c00"},
+    {no:"011", kab:"Blitar", lokasi:"Desa Ngembul", tgl:"24 Jul 2026", kawasan:"Lahan Warga", luas:5.00, sumber:"Inews", cat:"Lahan", color:"#607d8b"},
+    {no:"012", kab:"Ponorogo", lokasi:"Gunung Gombak", tgl:"13-14 Jul 2026", kawasan:"Perhutani", luas:15.00, sumber:"CNN", cat:"Perhutani", color:"#f57c00"},
+    {no:"013", kab:"Ponorogo", lokasi:"Petak 62", tgl:"22 Jul 2026", kawasan:"Perhutani", luas:2.30, sumber:"Radar Madiun", cat:"Perhutani", color:"#f57c00"},
+    {no:"014", kab:"Malang", lokasi:"TNBTS", tgl:"17 Ags 2026", kawasan:"Taman Nasional", luas:1121.66, sumber:"CNN", cat:"Taman Nasional", color:"#d32f2f"},
+    {no:"015", kab:"Pacitan", lokasi:"Desa Sambong", tgl:"7 Jul 2026", kawasan:"Lahan Warga", luas:15.00, sumber:"JTV", cat:"Lahan", color:"#607d8b"},
+    {no:"016", kab:"Pacitan", lokasi:"Dsn Tenggaran", tgl:"22 Jul 2026", kawasan:"Lahan Warga", luas:1.00, sumber:"Radar Madiun", cat:"Lahan", color:"#607d8b"},
+    {no:"017", kab:"Lumajang", lokasi:"G Pucangrangga", tgl:"10 Jul 2026", kawasan:"Perhutani", luas:9.48, sumber:"BPBD", cat:"Perhutani", color:"#f57c00"},
+    {no:"018", kab:"Madiun", lokasi:"RPH Dawuhan", tgl:"9 Jul 2026", kawasan:"Perhutani", luas:0.30, sumber:"BPBD", cat:"Perhutani", color:"#f57c00"},
+    {no:"019", kab:"Jember", lokasi:"Gunung Watangan", tgl:"9 Ags 2026", kawasan:"Perhutani", luas:6.50, sumber:"Kompas", cat:"Perhutani", color:"#f57c00"},
+    {no:"020", kab:"Malang", lokasi:"Gunung Geger", tgl:"14 Ags 2026", kawasan:"Perhutani", luas:12.00, sumber:"Antara", cat:"Perhutani", color:"#f57c00"},
+    {no:"021", kab:"Bondowoso", lokasi:"Arak-Arak", tgl:"13 Ags 2026", kawasan:"Perhutani", luas:6.00, sumber:"Kompas", cat:"Perhutani", color:"#f57c00"},
+    {no:"022", kab:"Blitar", lokasi:"Gunung Kuncen", tgl:"10 Ags 2026", kawasan:"Lahan Warga", luas:0.05, sumber:"Kompas", cat:"Lahan", color:"#607d8b"},
+    {no:"023", kab:"Blitar", lokasi:"Gunung Pegat", tgl:"8 Ags 2026", kawasan:"Lahan Warga", luas:0.05, sumber:"Kompas", cat:"Lahan", color:"#607d8b"},
+    {no:"024", kab:"Magetan", lokasi:"Desa Mategal", tgl:"17 Ags 2026", kawasan:"Lahan Warga", luas:3.00, sumber:"Beritajatim", cat:"Lahan", color:"#607d8b"},
+    {no:"025", kab:"Magetan", lokasi:"Gunung Bungkuk", tgl:"9 Ags 2026", kawasan:"Lahan Warga", luas:5.00, sumber:"RRI", cat:"Lahan", color:"#607d8b"}
 ];
 
 const dataHotspot = [
@@ -168,6 +162,17 @@ const dataHotspot = [
     {kab:"Tuban",kec:"Kerek",desa:"Sumberarum",tgl:"18-08-2026",wkt:"01:47",lat:-6.86552,lng:111.90559}
 ];
 
+// Render Top 5
+const countByKab = {};
+dataHotspot.forEach(d => { countByKab[d.kab] = (countByKab[d.kab] || 0) + 1; });
+let top = Object.keys(countByKab).map(k => ({k: k, c: countByKab[k]}));
+top.sort((a, b) => b.c - a.c);
+top = top.slice(0, 5);
+let h2 = '';
+top.forEach(i=>{ h2+=`<div class="picto-row"><div class="picto-label">${i.k}</div><div class="picto-icons">${'🔥'.repeat(i.c)}</div><span class="picto-count">${i.c}</span></div>`; });
+document.getElementById('picto').innerHTML=h2;
+
+// Render Pie Chart
 let lTN=0, lT=0, lP=0, lW=0;
 dataMedia.forEach(t => {
     if(t.cat==='Taman Nasional') lTN+=t.luas; 
@@ -175,42 +180,50 @@ dataMedia.forEach(t => {
     else if(t.cat==='Perhutani') lP+=t.luas; 
     else lW+=t.luas;
 });
-const total = lTN + lT + lP + lW;
-const dataBar = [
-    {name:'Taman Nasional', val:lTN, color:'#ff0000'},
-    {name:'Perhutani', val:lP, color:'#ffab00'},
-    {name:'Tahura', val:lT, color:'#00f0ff'},
-    {name:'Lahan Warga', val:lW, color:'#aaff00'}
-];
-let h = '';
-dataBar.forEach(d => {
-    const pct = total > 0 ? (d.val/total)*100 : 0;
-    h += `<div class="bar-row"><div class="bar-info"><span>${d.name}</span><span>${d.val.toFixed(2)} Ha</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${d.color}; color:${d.color};"></div></div></div>`;
-});
-document.getElementById('bar-chart').innerHTML = h;
+const tracePie = {
+    values:[lTN, lT, lP, lW],
+    labels:['Taman Nasional','Tahura','Perhutani','Lahan Warga'],
+    type:'pie', hole:0.4,
+    marker:{colors:['#d32f2f','#1976d2','#f57c00','#607d8b'],line:{color:'rgba(255,255,255,0.8)',width:2}},
+    textinfo:'value', texttemplate:'%{value:.1f} Ha', textposition:'inside', insidetextorientation:"radial",
+    textfont:{size:11,color:'white',weight:'bold'},
+    hovertemplate:'<b>%{label}</b><br>Luas: %{value:.2f} Ha<br>%{percent}<extra></extra>', sort:false
+};
+const layoutPie = {margin:{l:5,r:5,b:0,t:5},showlegend:true,legend:{orientation:"h",y:-0.1,x:0.5,xanchor:'center',font:{size:9,color:'#444'}},paper_bgcolor:'transparent',plot_bgcolor:'transparent'};
+Plotly.newPlot('chart-pie', [tracePie], layoutPie, {displayModeBar:false, responsive:true});
 
-const countByKab = {};
-dataHotspot.forEach(d => { countByKab[d.kab] = (countByKab[d.kab] || 0) + 1; });
-let top = Object.keys(countByKab).map(k => ({k: k, c: countByKab[k]}));
-top.sort((a, b) => b.c - a.c);
-top = top.slice(0, 5);
-let h2 = '';
-const maxC = top.length > 0 ? top[0].c : 1;
-top.forEach((i, idx) => {
-    const w = (i.c/maxC)*100;
-    h2 += `<div class="hotspot-row"><span class="hotspot-rank">0${idx+1}</span><span class="hotspot-name">${i.k}</span><div class="hotspot-bar" style="width:${w}%; max-width:60px;"></div><span class="hotspot-count">${i.c}</span></div>`;
-});
-document.getElementById('hotspot-list').innerHTML = h2;
-
+// Render Tabel
 window.renderTable = function() {
     let q = document.getElementById('table-search').value.toLowerCase();
     let th='';
     let d = dataMedia.filter(t => (t.lokasi+' '+t.kab+' '+t.kawasan+' '+t.sumber).toLowerCase().includes(q));
-    if(d.length===0) th='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-dim);">NO DATA FOUND</td></tr>';
-    else { d.forEach(t=>{ let tc=t.cat==='Taman Nasional'?'tag-tn':t.cat==='Tahura'?'tag-tahura':t.cat==='Perhutani'?'tag-perhutani':'tag-warga'; th+=`<tr><td style="color:var(--text-dim);">${t.no}</td><td><strong>${t.lokasi}</strong><br><span style="color:var(--text-dim);font-size:9px;">${t.kab} | ${t.tgl}</span></td><td><span class="tag ${tc}">${t.kawasan}</span></td><td style="color:#fff;">${t.luas.toLocaleString('id-ID')}</td><td style="color:var(--text-dim);font-size:9px;">${t.sumber}</td></tr>`; }); }
+    if(d.length===0) th='<tr><td colspan="5" style="text-align:center;padding:20px;color:#999;">Data tidak ditemukan.</td></tr>';
+    else { d.forEach(t=>{ let tc=t.cat==='Taman Nasional'?'tag-tn':t.cat==='Tahura'?'tag-tahura':t.cat==='Perhutani'?'tag-perhutani':'tag-warga'; th+=`<tr><td style="color:#999;">${t.no}</td><td><strong>${t.lokasi}</strong><br><small style="color:#999;">${t.kab} | ${t.tgl}</small></td><td><span class="tag ${tc}">${t.kawasan}</span></td><td><strong>${t.luas.toLocaleString('id-ID')}</strong></td><td><em style="color:#888;font-size:11px;">${t.sumber}</em></td></tr>`; }); }
     document.getElementById('table-body').innerHTML=th;
 };
 renderTable();
+
+// Logika Tombol Accordion
+const accBtn = document.getElementById('accordion-btn');
+const accContent = document.getElementById('accordion-content');
+if(accBtn) {
+    accBtn.addEventListener('click', function() {
+        const icon = this.querySelector('.accordion-icon');
+        const textSpan = this.querySelector('span:first-child');
+        if (accContent.classList.contains('show')) {
+            accContent.classList.remove('show');
+            accContent.style.maxHeight = null;
+            icon.innerText = '▼';
+            textSpan.innerText = 'Klik Data Lengkap';
+        } else {
+            accContent.classList.add('show');
+            accContent.style.maxHeight = accContent.scrollHeight + "px";
+            icon.innerText = '▲';
+            textSpan.innerText = 'Tutup Data Lengkap';
+        }
+        sendHeight();
+    });
+}
 
 function sendHeight() { var h = document.body.scrollHeight; window.parent.postMessage({ type: 'jatimBencanaMapHeight', height: h }, '*'); }
 sendHeight(); setTimeout(sendHeight, 1000); setTimeout(sendHeight, 3000);
